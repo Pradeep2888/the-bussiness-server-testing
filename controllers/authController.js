@@ -12,8 +12,8 @@ const prisma = new PrismaClient();
 const fs = require("fs");
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+  return jwt.sign({ id }, "Kapil123", {
+    expiresIn: "1d",
   });
 };
 
