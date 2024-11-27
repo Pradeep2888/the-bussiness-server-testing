@@ -54,7 +54,7 @@ app.use(
 
 // Testing Root route
 app.get("/", (req, res) => {
-  res.send("API working fine");
+  res.send('API working fine', req.headers.origin);
 });
 
 // Routes
