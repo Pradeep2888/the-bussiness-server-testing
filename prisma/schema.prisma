@@ -1,0 +1,241 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  name         String         @db.VarChar(255)
+  email        String         @unique
+  password     String         @db.VarChar(255)
+  address      String?        @db.VarChar(255)
+  verified     Boolean        @default(false)
+  image        String?        @db.VarChar(255)
+  phone        String?        @db.VarChar(255)
+  createdAt    DateTime?      @default(now())
+  verification String?        @db.VarChar(255)
+  reviewId     String?
+  countryCode  String?        @default("+1")
+  Review       Review[]
+  ReviewReport ReviewReport[]
+  isTop        Boolean        @default(false)
+
+  @@map("users")
+}
+
+model FooterSetting {
+  id          String @id @default(uuid())
+  content     String @db.LongText
+  topsearches String @unique
+}
+
+model BlogCategory {
+  id   String   @id @default(uuid())
+  name String   @unique
+  date DateTime @default(now())
+}
+
+model blogComment {
+  id      String   @id @default(uuid())
+  name    String
+  email   String
+  postid  String
+  active  Boolean?
+  message String
+  date    DateTime @default(now())
+}
+
+model Blog {
+  id              String   @id @default(uuid())
+  title           String
+  alt             String
+  description     String   @db.LongText
+  image           String
+  metaTitle       String
+  metaDescription String   @db.LongText
+  metaKeywords    String
+  tags            String
+  category        String
+  faq             Json
+  table           String?
+  date            DateTime @default(now())
+}
+
+model Review {
+  id             String                  @id @default(uuid())
+  name           String
+  email          String
+  title          String
+  review         String
+  rating         Int
+  date           DateTime                @default(now())
+  createdAt      DateTime                @default(now())
+  active         Boolean?
+  reply          String?
+  user           User?                   @relation(fields: [userId], references: [id])
+  userId         String?
+  listingId      String?
+  listing        businessPrimaryDetails? @relation(fields: [listingId], references: [id])
+  ReviewReport   ReviewReport[]
+  businessUserId String?
+
+  @@map("reviews")
+}
+
+model ReviewReport {
+  id        String                 @id @default(uuid())
+  report    String
+  userId    String
+  user      User?                  @relation(fields: [userId], references: [id])
+  listingId String
+  listing   businessPrimaryDetails @relation(fields: [listingId], references: [id])
+
+  reviewId String
+  review   Review   @relation(fields: [reviewId], references: [id])
+  date     DateTime @default(now())
+
+  @@map("review_report")
+}
+
+model Category {
+  id    String  @id @default(uuid())
+  title String
+  onTop Boolean @default(false)
+
+  @@map("category")
+}
+
+// -------------------------------------------------------------------
+
+model business_listing {
+  id           Int      @id @default(autoincrement())
+  userId       String?  @db.VarChar(100)
+  companyName  String?  @db.VarChar(1000)
+  categoryId   String   @db.VarChar(100)
+  logo         String?  @db.VarChar(1000)
+  websiteLink  String   @db.VarChar(1000)
+  about        String?  @db.VarChar(1000)
+  city         String?  @db.VarChar(100)
+  pincode      String?  @db.VarChar(100)
+  physical     Boolean  @default(false)
+  email        String?  @db.VarChar(100)
+  phone        String?  @db.VarChar(100)
+  address      String?  @db.VarChar(100)
+  date         DateTime? @db.Date
+  verifyCode   String?  @db.VarChar(1000)
+  status       Boolean? 
+  hasAdmin     Boolean? 
+}
+
+
+
+model businessUsers {
+  id            String                   @id @default(uuid())
+  fname         String                   @db.VarChar(255)
+  lname         String                   @db.VarChar(255)
+  email         String                   @unique
+  website       String?                  @unique @db.VarChar(255)
+  companyname   String?                  @db.VarChar(255)
+  address       String?                  @db.VarChar(255)
+  complete      Boolean?                 @default(false)
+  verified      Boolean                  @default(false)
+  password      String?                  @db.VarChar(255)
+  jobtitle      String?                  @db.VarChar(255)
+  phone         String?                  @db.VarChar(255)
+  country       String?                  @db.VarChar(255)
+  createdAt     DateTime?                @default(now())
+  verification  String?                  @db.VarChar(255)
+  acountType    String                   @db.VarChar(255)
+  static_code   String?                  @db.VarChar(255)
+  details       businessPrimaryDetails[]
+  businessMedia businessMedia[]
+
+  @@map("business_users")
+}
+
+model businessPrimaryDetails {
+  id            String         @id @default(uuid())
+  userid        String?        @db.VarChar(255)
+  colorScheme   String?        @default("#02B9B5")
+  plantype      String?        @db.VarChar(255)
+  icon          String?        @db.VarChar(255)
+  banner        String?        @db.VarChar(255)
+  about         String?        @db.VarChar(255)
+  advertisement String?
+  sociallinks   Json?
+  category      String?
+  taken         Boolean        @default(false)
+  website       String         @unique
+  businessUsers businessUsers? @relation(fields: [userid], references: [id])
+  createdAt     DateTime?      @default(now())
+  adminStats    Boolean?
+  Review        Review[]
+  ReviewReport  ReviewReport[]
+  companyname   String?        @db.VarChar(255)
+  address       String?        @db.VarChar(255)
+  workemail     String?        @unique @db.VarChar(255)
+  phone         String?        @db.VarChar(255)
+
+  @@map("business_primary_details")
+}
+
+model businessMedia {
+  id              String         @id @default(uuid())
+  media_type      String         @db.VarChar(255)
+  media_url       String         @db.VarChar(255)
+  businessUsers   businessUsers? @relation(fields: [businessUsersId], references: [id])
+  businessUsersId String?
+  listingId       String
+  createdAt       DateTime       @default(now())
+
+  @@map("business_media")
+}
+
+model contactBusinessAdmin {
+  id        String   @id @default(uuid())
+  userId    String
+  listingId String
+  email     String
+  question  String
+  createdAt DateTime @default(now())
+
+  @@map("contact_business_admin")
+}
+
+model businessAdvertisement {
+  id        String   @id @default(uuid())
+  userId    String?
+  listingid String?
+  ads       Json?
+  createdAt DateTime @default(now())
+
+  @@map("business_advertisement")
+}
+
+model premiumUser {
+  id               String        @id @default(uuid())
+  userId           String?
+  listingid        String?
+  planActive       Boolean       @default(true)
+  subscription     subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId   String?
+  currentPlanStart DateTime?
+  currentPlanEnd   DateTime?
+  createdAt        DateTime      @default(now())
+
+  @@map("premium_user")
+}
+
+model subscription {
+  id          String        @id @default(uuid())
+  userId      String?
+  listingid   String?
+  paymentId   String?
+  createdAt   DateTime      @default(now())
+  premiumUser premiumUser[]
+}
